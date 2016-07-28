@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Hello World!</title>
+  <script src="http://apps.bdimg.com/libs/angular.js/1.4.6/angular.min.js"></script>
+</head>
+<body>
+  <h1>Hello World!</h1>
+  <!-- All of the Node.js APIs are available in this renderer process. -->
+  We are using node <script>document.write(process.versions.node)</script>,
+  Chromium <script>document.write(process.versions.chrome)</script>,
+  and Electron <script>document.write(process.versions.electron)</script>.
+
+<p>FTP测试服务器的联接讯息:</p>
+</p>ip: 13.76.44.89</p>
+</p>user: ftp-user</p>
+</p>passwd: ftp-us3r</p>
+
+<div ng-app="app" ng-controller="mainCtrl">
+    <button ng-click="connect()">connect</button>
+</div>
+
+</body>
+
+<script>
+// You can also require other files to run in this process
+require('./renderer.js')
+
+var SFTP = require('sftp-ws');
+
+var app = angular.module('app', []);
+app.controller('mainCtrl', function($scope) {
+  $scope.name = 'royce';
+  $scope.connect = function() {
+    var url = "ws://13.76.44.89:22/sftp";
+    var options = { username: "ftp-user", password: "ftp-us3r"};
+    var client = new SFTP.Client();
+    client.connect(url, options,function(err){
+      if (err) {
+        // handle error
+        console.log("Error: %s", err.message);
+        return;
+      }
+    });
+  };
+});
+</script>
+</html>
