@@ -3,6 +3,6 @@
 // All of the Node.js APIs are available in this process.
 var fs = require('fs');
 
-fs.writeFileSync('message.txt',
-    'This is my first Electron app!',
-    'utf8');
+// fs.writeFileSync('message.txt',
+//     'This is my first Electron app!',
+//     'utf8');

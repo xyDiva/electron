@@ -33,7 +33,7 @@ var app = angular.module('app', []);
 app.controller('mainCtrl', function($scope) {
   $scope.name = 'royce';
   $scope.connect = function() {
-    var url = "ws://13.76.44.89:22/sftp";
+    var url = "ws://13.76.44.89:22/";
     var options = { username: "ftp-user", password: "ftp-us3r"};
     var client = new SFTP.Client();
     client.connect(url, options,function(err){
