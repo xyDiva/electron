@@ -18,7 +18,13 @@
 </p>passwd: ftp-us3r</p>
 
 <div ng-app="app" ng-controller="mainCtrl">
-    <button ng-click="connect()">connect</button>
+    <button ng-click="Directory()">connect</button>
+    <button ng-click="CreateFolder()">Create Folder</button>
+    <button ng-click="DeleteFolder()">Delete Folder</button>
+    <button ng-click="RenameFolder()">Rename Folder</button>
+    <button ng-click="UploadFile()">Upload File</button>
+    <button ng-click="DeleteFile()">Delete File</button>
+    <button ng-click="Download()">Download</button>
 </div>
 
 </body>
@@ -27,22 +33,177 @@
 // You can also require other files to run in this process
 require('./renderer.js')
 
-var SFTP = require('sftp-ws');
+var Client = require('ssh2').Client;
+var connSettings = {
+     host: '13.76.44.89',
+     port: 22, // Normal is 22 port
+     username: 'ftp-user',
+     password: 'ftp-us3r'
+     // You can use a key file too, read the ssh2 documentation
+};
+var remoteRoot = '/home/ftp-user';
+
 
 var app = angular.module('app', []);
 app.controller('mainCtrl', function($scope) {
   $scope.name = 'royce';
-  $scope.connect = function() {
-    var url = "ws://13.76.44.89:22/";
-    var options = { username: "ftp-user", password: "ftp-us3r"};
-    var client = new SFTP.Client();
-    client.connect(url, options,function(err){
-      if (err) {
-        // handle error
-        console.log("Error: %s", err.message);
-        return;
-      }
-    });
+
+  $scope.Directory = function() {
+    var conn = new Client();
+    conn.on('ready', function() {
+        console.log('Client :: ready');
+
+        conn.sftp(function(err, sftp) {
+            if (err) throw err;
+            
+            sftp.readdir(remoteRoot, function(err, list) {
+                    if (err) throw err;
+                    // List the directory in the console
+                    console.dir(list);
+                    // Do not forget to close the connection, otherwise you'll get troubles
+                    conn.end();
+            });
+        });
+    }).connect(connSettings);
+  };
+
+  $scope.Download = function() {
+    var conn = new Client();
+    conn.on('ready', function() {
+        console.log('Client :: ready');
+
+        conn.sftp(function(err, sftp) {
+            if (err) throw err;
+            
+            sftp.fastGet (remoteRoot + "/message.txt", "d:/message.txt", function(err){
+                if (err) {
+                    console.log("Error, problem starting SFTP: %s", err);
+                }
+                else
+                {
+                    console.log("file downned");
+                }
+
+                conn.end();
+            });
+        });
+    }).connect(connSettings);
+  };
+
+  $scope.CreateFolder = function() {
+    var conn = new Client();
+    conn.on('ready', function() {
+        console.log('Client :: ready');
+
+        conn.sftp(function(err, sftp) {
+            if (err) throw err;
+            
+            sftp.mkdir(remoteRoot + "/test", function(err){
+                if (err) {
+                    console.log("Error, problem starting SFTP: %s", err);
+                }
+                else
+                {
+                    console.log("folder created");
+                }
+
+                conn.end();
+            });
+        });
+    }).connect(connSettings);
+  };
+
+  $scope.DeleteFolder = function() {
+    var conn = new Client();
+    conn.on('ready', function() {
+        console.log('Client :: ready');
+
+        conn.sftp(function(err, sftp) {
+            if (err) throw err;
+            
+            sftp.rmdir(remoteRoot + "/test", function(err){
+                if (err) {
+                    console.log("Error, problem starting SFTP: %s", err);
+                }
+                else
+                {
+                    console.log("folder removed");
+                }
+
+                conn.end();
+            });
+        });
+    }).connect(connSettings);
+  };
+
+  $scope.RenameFolder = function() {
+    var conn = new Client();
+    conn.on('ready', function() {
+        console.log('Client :: ready');
+
+        conn.sftp(function(err, sftp) {
+            if (err) throw err;
+            
+            sftp.rename(remoteRoot + "/test", remoteRoot + "/test1", function(err){
+                if (err) {
+                    console.log("Error, problem starting SFTP: %s", err);
+                }
+                else
+                {
+                    console.log("folder renamed");
+                }
+
+                conn.end();
+            });
+        });
+    }).connect(connSettings);
+  };
+  
+  $scope.UploadFile = function() {
+    var conn = new Client();
+    conn.on('ready', function() {
+        console.log('Client :: ready');
+
+        conn.sftp(function(err, sftp) {
+            if (err) throw err;
+            
+            var fs = require("fs"); // Use node filesystem
+            var readStream = fs.createReadStream("d:/Development/MyProject/git/sdsdoc/RMModule/test/message.txt");
+            var writeStream = sftp.createWriteStream(remoteRoot + "/message.txt");
+            writeStream.on('close',function () {
+                console.log("- file transferred succesfully");
+            });
+            writeStream.on('end', function () {
+                console.log("sftp connection closed");
+                conn.close();
+            });
+            // initiate transfer of file
+            readStream.pipe(writeStream);
+        });
+    }).connect(connSettings);
+  };
+
+  $scope.DeleteFile = function() {
+    var conn = new Client();
+    conn.on('ready', function() {
+        console.log('Client :: ready');
+
+        conn.sftp(function(err, sftp) {
+            if (err) throw err;
+            
+            sftp.unlink(remoteRoot + "/message.txt", function(err){
+                if (err) {
+                    console.log("Error, problem starting SFTP: %s", err);
+                }
+                else
+                {
+                    console.log("file unlinked");
+                }
+
+                conn.end();
+            });
+        });
+    }).connect(connSettings);
   };
 });
 </script>
